@@ -4,7 +4,7 @@ import { register } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
-  const { user, saveAuth } = useAuth();
+  const { user, setupRequired, saveAuth } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,8 +12,8 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If an admin is creating a user on behalf, redirect back to dashboard after
   const isAdminCreating = user?.role === 'admin';
+  const isFirstRun = setupRequired && !user;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -21,12 +21,12 @@ export default function Register() {
     setLoading(true);
     try {
       const result = await register(email, password, isAdminCreating ? role : undefined);
-      if (!isAdminCreating) {
-        // First-time bootstrap: log in as the new admin
+      if (isFirstRun) {
+        // Bootstrap: automatically sign in as the new admin
         saveAuth(result.token, result.user);
-        navigate('/');
+        navigate('/projects');
       } else {
-        navigate('/');
+        navigate('/projects');
       }
     } catch (err) {
       setError(err.message);
@@ -35,10 +35,15 @@ export default function Register() {
     }
   }
 
+  const title = isFirstRun ? 'Welcome — Create Admin Account' : isAdminCreating ? 'Create User' : 'Create Account';
+
   return (
     <div className="auth-wrapper">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>{isAdminCreating ? 'Create User' : 'Create Account'}</h1>
+        <h1>{title}</h1>
+        {isFirstRun && (
+          <p className="setup-hint">No users exist yet. This account will be the administrator.</p>
+        )}
         {error && <p className="error">{error}</p>}
         <label>
           Email
@@ -70,16 +75,21 @@ export default function Register() {
           </label>
         )}
         <button type="submit" disabled={loading}>
-          {loading ? 'Saving…' : isAdminCreating ? 'Create User' : 'Register'}
+          {loading ? 'Saving…' : isFirstRun ? 'Create Admin Account' : isAdminCreating ? 'Create User' : 'Register'}
         </button>
-        {!isAdminCreating && (
+        {!isFirstRun && isAdminCreating && (
+          <p className="switch-link">
+            <Link to="/projects">← Back to dashboard</Link>
+          </p>
+        )}
+        {!isFirstRun && !isAdminCreating && (
           <p className="switch-link">
             Already have an account? <Link to="/login">Sign in</Link>
           </p>
         )}
-        {isAdminCreating && (
+        {isFirstRun && (
           <p className="switch-link">
-            <Link to="/">← Back to dashboard</Link>
+            Already have an account? <Link to="/login">Sign in</Link>
           </p>
         )}
       </form>

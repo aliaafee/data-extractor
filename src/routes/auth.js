@@ -9,6 +9,17 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me_in_production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
+// GET /api/auth/setup — public, returns whether the first-run setup is needed
+router.get('/setup', async (req, res) => {
+  try {
+    const prisma = req.app.locals.prisma;
+    const count = await prisma.user.count();
+    res.json({ setupRequired: count === 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 function signToken(user) {
   return jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }

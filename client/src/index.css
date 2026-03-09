@@ -255,3 +255,90 @@ body { min-height: 100vh; }
   background: var(--surface);
   outline: none;
 }
+
+/* Project list */
+.project-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.project-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.project-card:hover { border-color: var(--primary); box-shadow: 0 0 0 3px #ede9fe; }
+
+.project-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+.project-name { font-weight: 600; font-size: 1rem; }
+
+/* Project detail */
+.project-detail-header { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.back-btn { align-self: flex-start; font-size: 0.875rem; }
+
+.project-title-row { display: flex; align-items: center; gap: 1rem; }
+.project-title { font-size: 1.4rem; font-weight: 700; }
+
+.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; }
+
+/* Prompt preview */
+.prompt-preview { display: flex; flex-direction: column; gap: 0.75rem; }
+.prompt-block { display: flex; flex-direction: column; gap: 0.3rem; }
+.prompt-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.prompt-text {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Project form */
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.project-form label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.875rem; font-weight: 500; color: var(--muted); }
+.project-form input,
+.project-form textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.project-form input:focus,
+.project-form textarea:focus { border-color: var(--primary); background: var(--surface); }
+
+.form-actions { display: flex; gap: 0.5rem; }
+.form-actions button[type="submit"] {
+  padding: 0.5rem 1.25rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.form-actions button[type="submit"]:hover:not(:disabled) { background: var(--primary-hover); }
+.form-actions button:disabled { opacity: 0.6; cursor: not-allowed; }

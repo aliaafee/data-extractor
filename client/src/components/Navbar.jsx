@@ -8,8 +8,8 @@ export default function Navbar() {
   return (
     <header className="topbar">
       <nav className="topbar-nav">
-        <NavLink to="/" end className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
-          Items
+        <NavLink to="/projects" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
+          Projects
         </NavLink>
         {isAdmin && (
           <NavLink to="/users" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>

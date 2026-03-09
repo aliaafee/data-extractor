@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const { saveAuth } = useAuth();
+  const { saveAuth, setupRequired } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Redirect to setup wizard on first run
+  useEffect(() => {
+    if (setupRequired) navigate('/register', { replace: true });
+  }, [setupRequired]);
 
   async function handleSubmit(e) {
     e.preventDefault();

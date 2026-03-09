@@ -1,7 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
-const itemsRouter = require('./routes/items');
+const projectsRouter = require('./routes/projects');
 const authRouter = require('./routes/auth');
 const authenticate = require('./middleware/auth');
 
@@ -17,7 +17,7 @@ app.locals.prisma = prisma;
 
 // Routes
 app.use('/api/auth', authRouter);
-app.use('/api/items', authenticate, itemsRouter);
+app.use('/api/projects', authenticate, projectsRouter);
 
 // Health check
 app.get('/health', (req, res) => {
