@@ -56,8 +56,8 @@ export const deleteProject = (id) =>
 // Items (nested under a project)
 export const getItems = (projectId) => request(`/projects/${projectId}/items`);
 
-export const createItem = (projectId, title, description) =>
-  request(`/projects/${projectId}/items`, { method: 'POST', body: JSON.stringify({ title, description }) });
+export const createItem = (projectId, sourceText, resultJSON) =>
+  request(`/projects/${projectId}/items`, { method: 'POST', body: JSON.stringify({ sourceText, resultJSON }) });
 
 export const updateItem = (projectId, id, data) =>
   request(`/projects/${projectId}/items/${id}`, { method: 'PATCH', body: JSON.stringify(data) });

@@ -36,8 +36,7 @@ export default function ProjectDetail() {
   const [saving, setSaving] = useState(false);
 
   // New item state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [sourceText, setSourceText] = useState("");
 
   useEffect(() => {
     Promise.all([getProject(projectId), getItems(projectId)])
@@ -77,16 +76,11 @@ export default function ProjectDetail() {
 
   async function handleCreateItem(e) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!sourceText.trim()) return;
     try {
-      const item = await createItem(
-        projectId,
-        title.trim(),
-        description.trim() || undefined,
-      );
+      const item = await createItem(projectId, sourceText.trim());
       setItems((prev) => [item, ...prev]);
-      setTitle("");
-      setDescription("");
+      setSourceText("");
     } catch (err) {
       setError(err.message);
     }
@@ -239,25 +233,20 @@ export default function ProjectDetail() {
 
         {/* Items */}
         <h2 className="text-xs font-semibold mb-3 text-gray-600 uppercase tracking-wide">
-          Items
+          Processed Items
         </h2>
-        <form className="flex gap-2 mb-6 flex-wrap" onSubmit={handleCreateItem}>
-          <input
-            className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-base outline-none transition-colors focus:border-indigo-600"
-            placeholder="New item title…"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+        <form className="flex gap-2 mb-6" onSubmit={handleCreateItem}>
+          <textarea
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-base outline-none transition-colors focus:border-indigo-600 resize-y font-mono"
+            placeholder="Paste source text to process…"
+            value={sourceText}
+            onChange={(e) => setSourceText(e.target.value)}
+            rows={3}
             required
-          />
-          <input
-            className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-base outline-none transition-colors focus:border-indigo-600"
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
           />
           <button
             type="submit"
-            className="px-5 py-2 bg-indigo-600 text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-indigo-700"
+            className="px-5 py-2 bg-indigo-600 text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-indigo-700 self-end"
           >
             Add
           </button>
@@ -272,33 +261,37 @@ export default function ProjectDetail() {
             {items.map((item) => (
               <li
                 key={item.id}
-                className={`flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg transition-opacity ${item.done ? "opacity-55" : ""}`}
+                className="flex flex-col gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg"
               >
-                <input
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={() => handleToggle(item)}
-                  className="w-4 h-4 cursor-pointer accent-indigo-600"
-                />
-                <div className="flex-1 flex flex-col gap-0.5">
-                  <span
-                    className={`font-medium ${item.done ? "line-through" : ""}`}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    onChange={() => handleToggle(item)}
+                    className="mt-1 w-4 h-4 cursor-pointer accent-indigo-600 shrink-0"
+                  />
+                  <div className="flex-1 flex flex-col gap-1 min-w-0">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Source Text</span>
+                    <pre className={`text-sm whitespace-pre-wrap break-words m-0 font-sans ${
+                      item.done ? "line-through opacity-50" : "text-gray-900"
+                    }`}>{item.sourceText}</pre>
+                    {item.resultJSON && (
+                      <>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 mt-2">Result</span>
+                        <pre className="text-xs bg-gray-50 border border-gray-200 rounded-md p-2 overflow-x-auto m-0 font-mono text-gray-800">{
+                          (() => { try { return JSON.stringify(JSON.parse(item.resultJSON), null, 2); } catch { return item.resultJSON; } })()
+                        }</pre>
+                      </>
+                    )}
+                  </div>
+                  <button
+                    className="bg-transparent border-none text-gray-400 cursor-pointer text-xs px-2 py-1 rounded transition-colors hover:text-red-500 hover:bg-red-50 shrink-0"
+                    onClick={() => handleDeleteItem(item.id)}
+                    title="Delete"
                   >
-                    {item.title}
-                  </span>
-                  {item.description && (
-                    <span className="text-xs text-gray-600">
-                      {item.description}
-                    </span>
-                  )}
+                    ✕
+                  </button>
                 </div>
-                <button
-                  className="bg-transparent border-none text-gray-600 cursor-pointer text-xs px-2 py-1 rounded transition-colors hover:text-red-500 hover:bg-red-50"
-                  onClick={() => handleDeleteItem(item.id)}
-                  title="Delete"
-                >
-                  ✕
-                </button>
               </li>
             ))}
           </ul>

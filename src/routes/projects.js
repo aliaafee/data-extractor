@@ -110,7 +110,7 @@ router.get('/:projectId/items', async (req, res) => {
       where: { id: projectId, ownerId: req.userId },
     });
     if (!project) return res.status(404).json({ error: 'Project not found' });
-    const items = await prisma.item.findMany({
+    const items = await prisma.processedItem.findMany({
       where: { projectId, userId: req.userId },
       orderBy: { createdAt: 'desc' },
     });
@@ -129,10 +129,10 @@ router.post('/:projectId/items', async (req, res) => {
       where: { id: projectId, ownerId: req.userId },
     });
     if (!project) return res.status(404).json({ error: 'Project not found' });
-    const { title, description } = req.body;
-    if (!title) return res.status(400).json({ error: 'title is required' });
-    const item = await prisma.item.create({
-      data: { title, description, userId: req.userId, projectId },
+    const { sourceText, resultJSON } = req.body;
+    if (!sourceText) return res.status(400).json({ error: 'sourceText is required' });
+    const item = await prisma.processedItem.create({
+      data: { sourceText, resultJSON, userId: req.userId, projectId },
     });
     res.status(201).json(item);
   } catch (err) {
@@ -145,14 +145,14 @@ router.patch('/:projectId/items/:id', async (req, res) => {
   try {
     const prisma = req.app.locals.prisma;
     const projectId = Number(req.params.projectId);
-    const existing = await prisma.item.findFirst({
+    const existing = await prisma.processedItem.findFirst({
       where: { id: Number(req.params.id), projectId, userId: req.userId },
     });
     if (!existing) return res.status(404).json({ error: 'Item not found' });
-    const { title, description, done } = req.body;
-    const item = await prisma.item.update({
+    const { sourceText, resultJSON, done } = req.body;
+    const item = await prisma.processedItem.update({
       where: { id: Number(req.params.id) },
-      data: { title, description, done },
+      data: { sourceText, resultJSON, done },
     });
     res.json(item);
   } catch (err) {
@@ -165,11 +165,11 @@ router.delete('/:projectId/items/:id', async (req, res) => {
   try {
     const prisma = req.app.locals.prisma;
     const projectId = Number(req.params.projectId);
-    const existing = await prisma.item.findFirst({
+    const existing = await prisma.processedItem.findFirst({
       where: { id: Number(req.params.id), projectId, userId: req.userId },
     });
     if (!existing) return res.status(404).json({ error: 'Item not found' });
-    await prisma.item.delete({ where: { id: Number(req.params.id) } });
+    await prisma.processedItem.delete({ where: { id: Number(req.params.id) } });
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });
