@@ -1,29 +1,29 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../api';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { login } from "../api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const { saveAuth, setupRequired } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Redirect to setup wizard on first run
   useEffect(() => {
-    if (setupRequired) navigate('/register', { replace: true });
+    if (setupRequired) navigate("/register", { replace: true });
   }, [setupRequired]);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       const { user, token } = await login(email, password);
       saveAuth(token, user);
-      navigate('/');
+      navigate("/");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -56,7 +56,7 @@ export default function Login() {
           />
         </label>
         <button type="submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign In'}
+          {loading ? "Signing in…" : "Sign In"}
         </button>
       </form>
     </div>
