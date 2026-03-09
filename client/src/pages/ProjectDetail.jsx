@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getProject, updateProject, getItems, createItem, updateItem, deleteItem } from '../api';
-import Navbar from '../components/Navbar';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  getProject,
+  updateProject,
+  getItems,
+  createItem,
+  updateItem,
+  deleteItem,
+} from "../api";
+import Navbar from "../components/Navbar";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -11,16 +18,20 @@ export default function ProjectDetail() {
   const [project, setProject] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Edit project state
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: '', systemPrompt: '', userPromptTemplate: '' });
+  const [form, setForm] = useState({
+    name: "",
+    systemPrompt: "",
+    userPromptTemplate: "",
+  });
   const [saving, setSaving] = useState(false);
 
   // New item state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     Promise.all([getProject(projectId), getItems(projectId)])
@@ -28,8 +39,8 @@ export default function ProjectDetail() {
         setProject(proj);
         setForm({
           name: proj.name,
-          systemPrompt: proj.systemPrompt ?? '',
-          userPromptTemplate: proj.userPromptTemplate ?? '',
+          systemPrompt: proj.systemPrompt ?? "",
+          userPromptTemplate: proj.userPromptTemplate ?? "",
         });
         setItems(its);
       })
@@ -59,10 +70,14 @@ export default function ProjectDetail() {
     e.preventDefault();
     if (!title.trim()) return;
     try {
-      const item = await createItem(projectId, title.trim(), description.trim() || undefined);
+      const item = await createItem(
+        projectId,
+        title.trim(),
+        description.trim() || undefined,
+      );
       setItems((prev) => [item, ...prev]);
-      setTitle('');
-      setDescription('');
+      setTitle("");
+      setDescription("");
     } catch (err) {
       setError(err.message);
     }
@@ -70,7 +85,9 @@ export default function ProjectDetail() {
 
   async function handleToggle(item) {
     try {
-      const updated = await updateItem(projectId, item.id, { done: !item.done });
+      const updated = await updateItem(projectId, item.id, {
+        done: !item.done,
+      });
       setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
     } catch (err) {
       setError(err.message);
@@ -86,72 +103,112 @@ export default function ProjectDetail() {
     }
   }
 
-  if (loading) return <div className="center">Loading…</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-500">
+        Loading…
+      </div>
+    );
 
   return (
-    <div className="dashboard">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="content">
-        {error && <p className="error">{error}</p>}
+      <main className="max-w-2xl w-full mx-auto my-8 px-4">
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         {/* Project header */}
-        <div className="project-detail-header">
-          <button className="btn-ghost back-btn" onClick={() => navigate('/projects')}>
+        <div className="mb-6 flex flex-col gap-3">
+          <button
+            className="self-start px-3 py-1.5 bg-transparent border border-gray-200 rounded-lg cursor-pointer text-sm text-gray-900 transition-colors hover:bg-gray-50"
+            onClick={() => navigate("/projects")}
+          >
             ← Projects
           </button>
           {!editing ? (
-            <div className="project-title-row">
-              <h1 className="project-title">{project?.name}</h1>
-              <button className="btn-ghost" onClick={() => setEditing(true)}>Edit</button>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold">{project?.name}</h1>
+              <button
+                className="px-3 py-1.5 bg-transparent border border-gray-200 rounded-lg cursor-pointer text-sm text-gray-900 transition-colors hover:bg-gray-50"
+                onClick={() => setEditing(true)}
+              >
+                Edit
+              </button>
             </div>
           ) : (
-            <form className="project-form" onSubmit={handleSaveProject}>
-              <label>
+            <form
+              className="flex flex-col gap-3 bg-white border border-gray-200 rounded-lg p-5 mb-4"
+              onSubmit={handleSaveProject}
+            >
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-600">
                 Name *
                 <input
                   value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
                   required
                   autoFocus
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
               </label>
-              <label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-600">
                 System Prompt
                 <textarea
                   value={form.systemPrompt}
-                  onChange={(e) => setForm((f) => ({ ...f, systemPrompt: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, systemPrompt: e.target.value }))
+                  }
                   rows={3}
                   placeholder="You are a helpful assistant…"
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
               </label>
-              <label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-600">
                 User Prompt Template
                 <textarea
                   value={form.userPromptTemplate}
-                  onChange={(e) => setForm((f) => ({ ...f, userPromptTemplate: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      userPromptTemplate: e.target.value,
+                    }))
+                  }
                   rows={3}
                   placeholder="Summarise the following: {{input}}"
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
               </label>
-              <div className="form-actions">
-                <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
-                <button type="button" className="btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-5 py-2 bg-indigo-600 text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  className="px-3 py-1.5 bg-transparent border border-gray-200 rounded-lg cursor-pointer text-sm text-gray-900 transition-colors hover:bg-gray-50"
+                  onClick={() => setEditing(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           )}
 
           {/* {!editing && (project?.systemPrompt || project?.userPromptTemplate) && (
-            <div className="prompt-preview">
+            <div className="flex flex-col gap-3">
               {project.systemPrompt && (
-                <div className="prompt-block">
-                  <span className="prompt-label">System Prompt</span>
-                  <pre className="prompt-text">{project.systemPrompt}</pre>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">System Prompt</span>
+                  <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words text-gray-900 m-0">{project.systemPrompt}</pre>
                 </div>
               )}
               {project.userPromptTemplate && (
-                <div className="prompt-block">
-                  <span className="prompt-label">User Prompt Template</span>
-                  <pre className="prompt-text">{project.userPromptTemplate}</pre>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">User Prompt Template</span>
+                  <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words text-gray-900 m-0">{project.userPromptTemplate}</pre>
                 </div>
               )}
             </div>
@@ -159,41 +216,62 @@ export default function ProjectDetail() {
         </div>
 
         {/* Items */}
-        <h2 className="section-title">Items</h2>
-        <form className="create-form" onSubmit={handleCreateItem}>
+        <h2 className="text-xs font-semibold mb-3 text-gray-600 uppercase tracking-wide">
+          Items
+        </h2>
+        <form className="flex gap-2 mb-6 flex-wrap" onSubmit={handleCreateItem}>
           <input
-            className="input-title"
+            className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-base outline-none transition-colors focus:border-indigo-600"
             placeholder="New item title…"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
           <input
-            className="input-desc"
+            className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-base outline-none transition-colors focus:border-indigo-600"
             placeholder="Description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <button type="submit">Add</button>
+          <button
+            type="submit"
+            className="px-5 py-2 bg-indigo-600 text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-indigo-700"
+          >
+            Add
+          </button>
         </form>
 
         {items.length === 0 ? (
-          <p className="empty">No items yet. Add one above!</p>
+          <p className="text-gray-600 text-center mt-12">
+            No items yet. Add one above!
+          </p>
         ) : (
-          <ul className="item-list">
+          <ul className="list-none flex flex-col gap-2">
             {items.map((item) => (
-              <li key={item.id} className={`item-row${item.done ? ' done' : ''}`}>
+              <li
+                key={item.id}
+                className={`flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg transition-opacity ${item.done ? "opacity-55" : ""}`}
+              >
                 <input
                   type="checkbox"
                   checked={item.done}
                   onChange={() => handleToggle(item)}
+                  className="w-4 h-4 cursor-pointer accent-indigo-600"
                 />
-                <div className="item-text">
-                  <span className="item-title">{item.title}</span>
-                  {item.description && <span className="item-desc">{item.description}</span>}
+                <div className="flex-1 flex flex-col gap-0.5">
+                  <span
+                    className={`font-medium ${item.done ? "line-through" : ""}`}
+                  >
+                    {item.title}
+                  </span>
+                  {item.description && (
+                    <span className="text-xs text-gray-600">
+                      {item.description}
+                    </span>
+                  )}
                 </div>
                 <button
-                  className="btn-delete"
+                  className="bg-transparent border-none text-gray-600 cursor-pointer text-xs px-2 py-1 rounded transition-colors hover:text-red-500 hover:bg-red-50"
                   onClick={() => handleDeleteItem(item.id)}
                   title="Delete"
                 >
