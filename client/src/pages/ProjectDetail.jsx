@@ -9,6 +9,11 @@ import {
   deleteItem,
 } from "../api";
 import Navbar from "../components/Navbar";
+import {
+  ExtractionSchemaEditor,
+  ExtractionSchemaView,
+  generatePromptFromSchema,
+} from "../components/ExtractionSchemaEditor";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -26,6 +31,7 @@ export default function ProjectDetail() {
     name: "",
     systemPrompt: "",
     userPromptTemplate: "",
+    extractionSchema: [],
   });
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +47,7 @@ export default function ProjectDetail() {
           name: proj.name,
           systemPrompt: proj.systemPrompt ?? "",
           userPromptTemplate: proj.userPromptTemplate ?? "",
+          extractionSchema: proj.extractionSchema ?? [],
         });
         setItems(its);
       })
@@ -56,7 +63,9 @@ export default function ProjectDetail() {
         name: form.name.trim(),
         systemPrompt: form.systemPrompt.trim() || null,
         userPromptTemplate: form.userPromptTemplate.trim() || null,
+        extractionSchema: form.extractionSchema.length > 0 ? form.extractionSchema : null,
       });
+      setForm((f) => ({ ...f, extractionSchema: updated.extractionSchema ?? [] }));
       setProject(updated);
       setEditing(false);
     } catch (err) {
@@ -151,8 +160,17 @@ export default function ProjectDetail() {
                   className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
               </label>
-              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-600">
-                System Prompt
+              <ExtractionSchemaEditor
+                value={form.extractionSchema}
+                onChange={(schema) =>
+                  setForm((f) => ({ ...f, extractionSchema: schema }))
+                }
+              />
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">System Prompt</span>
+                </div>
                 <textarea
                   value={form.systemPrompt}
                   onChange={(e) =>
@@ -160,11 +178,29 @@ export default function ProjectDetail() {
                   }
                   rows={3}
                   placeholder="You are a helpful assistant…"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-lg font-mono text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-600">
-                User Prompt Template
+              </div>
+
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">User Prompt Template</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        userPromptTemplate: generatePromptFromSchema(f.extractionSchema),
+                      }))
+                    }
+                    disabled={form.extractionSchema.length === 0}
+                    className="px-3 py-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg cursor-pointer transition-colors hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Generate prompt from schema"
+                  >
+                    ↻ Generate from Schema
+                  </button>
+                </div>
                 <textarea
                   value={form.userPromptTemplate}
                   onChange={(e) =>
@@ -173,11 +209,14 @@ export default function ProjectDetail() {
                       userPromptTemplate: e.target.value,
                     }))
                   }
-                  rows={3}
+                  rows={8}
                   placeholder="Summarise the following: {{input}}"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-base font-sans text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-lg font-mono text-gray-900 bg-gray-50 outline-none resize-y transition-colors focus:border-indigo-600 focus:bg-white"
                 />
-              </label>
+              </div>
+
+              
+
               <div className="flex gap-2">
                 <button
                   type="submit"
@@ -196,23 +235,6 @@ export default function ProjectDetail() {
               </div>
             </form>
           )}
-
-          {/* {!editing && (project?.systemPrompt || project?.userPromptTemplate) && (
-            <div className="flex flex-col gap-3">
-              {project.systemPrompt && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">System Prompt</span>
-                  <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words text-gray-900 m-0">{project.systemPrompt}</pre>
-                </div>
-              )}
-              {project.userPromptTemplate && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">User Prompt Template</span>
-                  <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words text-gray-900 m-0">{project.userPromptTemplate}</pre>
-                </div>
-              )}
-            </div>
-          )} */}
         </div>
 
         {/* Items */}

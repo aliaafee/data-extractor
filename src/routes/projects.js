@@ -2,6 +2,14 @@ const { Router } = require('express');
 
 const router = Router();
 
+const parseSchema = (project) => {
+  if (!project) return project;
+  return {
+    ...project,
+    extractionSchema: project.extractionSchema ? JSON.parse(project.extractionSchema) : null,
+  };
+};
+
 // GET /api/projects - list projects owned by or shared with the user
 router.get('/', async (req, res) => {
   try {
@@ -11,7 +19,7 @@ router.get('/', async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: { _count: { select: { items: true } } },
     });
-    res.json(projects);
+    res.json(projects.map(parseSchema));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -25,7 +33,7 @@ router.get('/:id', async (req, res) => {
       where: { id: Number(req.params.id), ownerId: req.userId },
     });
     if (!project) return res.status(404).json({ error: 'Project not found' });
-    res.json(project);
+    res.json(parseSchema(project));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -35,12 +43,18 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const prisma = req.app.locals.prisma;
-    const { name, systemPrompt, userPromptTemplate } = req.body;
+    const { name, systemPrompt, userPromptTemplate, extractionSchema } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
     const project = await prisma.project.create({
-      data: { name, systemPrompt, userPromptTemplate, ownerId: req.userId },
+      data: {
+        name,
+        systemPrompt,
+        userPromptTemplate,
+        extractionSchema: extractionSchema != null ? JSON.stringify(extractionSchema) : undefined,
+        ownerId: req.userId,
+      },
     });
-    res.status(201).json(project);
+    res.status(201).json(parseSchema(project));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -50,16 +64,21 @@ router.post('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   try {
     const prisma = req.app.locals.prisma;
-    const { name, systemPrompt, userPromptTemplate } = req.body;
+    const { name, systemPrompt, userPromptTemplate, extractionSchema } = req.body;
     const existing = await prisma.project.findFirst({
       where: { id: Number(req.params.id), ownerId: req.userId },
     });
     if (!existing) return res.status(404).json({ error: 'Project not found' });
     const project = await prisma.project.update({
       where: { id: Number(req.params.id) },
-      data: { name, systemPrompt, userPromptTemplate },
+      data: {
+        name,
+        systemPrompt,
+        userPromptTemplate,
+        extractionSchema: extractionSchema != null ? JSON.stringify(extractionSchema) : undefined,
+      },
     });
-    res.json(project);
+    res.json(parseSchema(project));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
